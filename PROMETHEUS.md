@@ -30,14 +30,14 @@ topk( 5,
 )
 ```
 
-__Memory cost for the *default* namespace__
+__Hourly memory cost for the *default* namespace__
 
 ```
 sum(
-  container_memory_allocation_bytes{namespace="default"} 
+  avg(container_memory_allocation_bytes{namespace="default"}) by (instance) / 1024 / 1024 / 1024
   * 
-  on(instance) group_left() node_ram_hourly_cost  / 1024 / 1024 / 1024
-) by (namespace)
+  on(instance) group_left() avg(node_ram_hourly_cost) by (instance)
+)
 ```
 
 __Monthly cost of currently provisioned nodes__
@@ -58,5 +58,7 @@ sum(node_total_hourly_cost) * 730
 | node_ram_hourly_cost   | Hourly cost per Gb of memory on this node                       |
 | node_total_hourly_cost   | Total node cost per hour                       |
 | container_cpu_allocation   | Average number of CPUs requested/used over last 1m                      |
+| container_gpu_allocation   | Average number of GPUs requested over last 1m                      |
 | container_memory_allocation_bytes   | Average bytes of RAM requested/used over last 1m                 |
+| pod_pvc_allocation   | Bytes provisioned for a PVC attached to a pod                      |
 | pv_hourly_cost   | Hourly cost per GP on a persistent volume                 |

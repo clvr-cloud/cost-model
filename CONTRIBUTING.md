@@ -5,7 +5,32 @@ Thanks for your help improving the project!
 ## Getting Help ##
 
 If you have a question about Kubecost or have encountered problems using it,
-you can start by asking a question on [Slack](https://join.slack.com/t/kubecost/shared_invite/enQtNTA2MjQ1NDUyODE5LTg0MzYyMDIzN2E4M2M5OTE3NjdmODJlNzBjZGY1NjQ3MThlODVjMGY3NWZlNjQ5NjIwNDc2NGU3MWNiM2E5Mjc) or via email at [team@kubecost.com](team@kubecost.com)
+you can start by asking a question on [Slack](https://join.slack.com/t/kubecost/shared_invite/enQtNTA2MjQ1NDUyODE5LWFjYzIzNWE4MDkzMmUyZGU4NjkwMzMyMjIyM2E0NGNmYjExZjBiNjk1YzY5ZDI0ZTNhZDg4NjlkMGRkYzFlZTU) or via email at [team@kubecost.com](team@kubecost.com)
+
+## Building ## 
+
+Follow these steps to build from source and deploy:
+
+1. `docker build --rm -f "Dockerfile" -t <repo>/kubecost-cost-model:<tag> .`
+2. Edit the [pulled image](https://github.com/kubecost/cost-model/blob/master/kubernetes/deployment.yaml#L22) in the deployment.yaml to <repo>/kubecost-cost-model:<tag>
+3. Set [this environment variable](https://github.com/kubecost/cost-model/blob/master/kubernetes/deployment.yaml#L30) to the address of your prometheus server
+4. `kubectl create namespace cost-model`
+5. `kubectl apply -f kubernetes/ --namespace cost-model`
+6. `kubectl port-forward --namespace cost-model service/cost-model 9003`
+
+To test, build the cost-model docker container and then push it to a Kubernetes cluster with a running Prometheus.
+
+To confirm that the server is running, you can hit [http://localhost:9003/costDataModel?timeWindow=1d](http://localhost:9003/costDataModel?timeWindow=1d)
+
+## Running the integration tests ##
+To run these tests:
+* Make sure you have a kubeconfig that can point to your cluster, and have permissions to create/modify a namespace called "test"
+* Connect to your the prometheus kubecost emits to on localhost:9003: 
+```kubectl port-forward --namespace kubecost service/kubecost-prometheus-server 9003:80```
+* Temporary workaround: Copy the default.json file in this project at cloud/default.json to /models/default.json on the machine your test is running on. TODO: fix this and inject the cloud/default.json path into provider.go.
+* Navigate to cost-model/test
+* Run ```go test -timeout 700s``` from the testing directory. The tests right now take about 10 minutes (600s) to run because they bring up and down pods and wait for Prometheus to scrape data about them.
+
 
 ## Certification of Origin ##
 
@@ -17,4 +42,4 @@ Please write a commit message with Fixes Issue # if there is an outstanding issu
 
 Please run go fmt on the project directory. Lint can be okay (for example, comments on exported functions are nice but not required on the server). 
 
-Integration testing is coming soon! When these exist make sure the integration tests pass :). For now, if you need help manually testing reach out to us on [Slack](https://join.slack.com/t/kubecost/shared_invite/enQtNTA2MjQ1NDUyODE5LTg0MzYyMDIzN2E4M2M5OTE3NjdmODJlNzBjZGY1NjQ3MThlODVjMGY3NWZlNjQ5NjIwNDc2NGU3MWNiM2E5Mjc). To generalize, if you hit the /costDataModel?timeWindow=1d endpoint and haven’t changed allocation code, the project isn't completely broken.
+Please email us (team@kubecost.com) or reach out to us on [Slack](https://join.slack.com/t/kubecost/shared_invite/enQtNTA2MjQ1NDUyODE5LWFjYzIzNWE4MDkzMmUyZGU4NjkwMzMyMjIyM2E0NGNmYjExZjBiNjk1YzY5ZDI0ZTNhZDg4NjlkMGRkYzFlZTU) if you need help or have any questions!

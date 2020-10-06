@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cost-model
@@ -6,6 +6,9 @@ metadata:
     app: cost-model
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: cost-model
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -19,7 +22,7 @@ spec:
       restartPolicy: Always
       serviceAccountName: cost-model
       containers:
-        - image: ajaytripathy/kubecost-cost-model:latest
+        - image: quay.io/kubecost1/kubecost-cost-model:latest
           name: cost-model
           resources:
             requests:
@@ -27,7 +30,7 @@ spec:
               memory: "55M"
           env:
             - name: PROMETHEUS_SERVER_ENDPOINT
-              value: "{{prometheusEndpoint}}"  #The endpoint should have the form http://<service-name>.<namespace-name>.svc.cluster.local 
+              value: "{{prometheusEndpoint}}"  #The endpoint should have the form http://<service-name>.<namespace-name>.svc
             - name: CLOUD_PROVIDER_API_KEY
-              value: "AIzaSyD29bGxmHAVEOBYtgd8sYM2gM2ekfxQX4U" # The GCP Pricing API requires a key.
+              value: "AIzaSyD29bGxmHAVEOBYtgd8sYM2gM2ekfxQX4U" # The GCP Pricing API requires a key. This is supplied just for evaluation.
           imagePullPolicy: Always
